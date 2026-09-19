@@ -2,6 +2,7 @@ import express from "express";
 import {
   createSale,
   getSales,
+  updateSale,
   deleteSale,
 } from "../controllers/saleController.js";
 import { protect } from "../middleware/authMiddleware.js";
@@ -14,6 +15,7 @@ const router = express.Router();
 
 router.post("/", protect, verifiedEmployeeOnly, createSale);
 router.get("/", protect, getSales);
-router.delete("/:id", protect, adminOnly, deleteSale);
+router.put("/:id", protect, updateSale);
+router.delete("/:id", protect, deleteSale);
 
 export default router;

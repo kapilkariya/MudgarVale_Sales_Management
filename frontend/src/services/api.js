@@ -39,5 +39,6 @@ export const fetchEmployeesWithStats = () => api.get("/employees");
 export const toggleEmployeeVerify = (id) => api.patch(`/employees/${id}/verify`);
 export const toggleEmployeeActive = (id) => api.patch(`/employees/${id}/active`);
 export const updateEmployee = (id, payload) => api.put(`/employees/${id}`, payload);
+export const updateSale = (id, payload) => api.put(`/sales/${id}`, payload);
 
 export default api;

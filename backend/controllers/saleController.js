@@ -104,14 +104,63 @@ export const getSales = async (req, res) => {
 
 // @desc    Delete a sale (admin only)
 // @route   DELETE /api/sales/:id
+// @desc    Delete a sale (employee deletes own; admin deletes any)
+// @route   DELETE /api/sales/:id
 export const deleteSale = async (req, res) => {
   try {
-    const sale = await Sale.findByIdAndDelete(req.params.id);
+    const sale = await Sale.findById(req.params.id);
     if (!sale) return res.status(404).json({ message: "Sale not found" });
+
+    if (req.user.role === "employee" && sale.employeeName !== req.user.name) {
+      return res.status(403).json({ message: "Not your sale" });
+    }
+
+    await sale.deleteOne();
     res.status(200).json({ message: "Sale deleted" });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to delete sale", error: error.message });
+    res.status(500).json({ message: "Failed to delete sale", error: error.message });
+  }
+};
+
+// @desc    Update an existing sale (employee edits their own; admin edits any)
+// @route   PUT /api/sales/:id
+export const updateSale = async (req, res) => {
+  try {
+    const sale = await Sale.findById(req.params.id);
+    if (!sale) return res.status(404).json({ message: "Sale not found" });
+
+    // Employee can only edit their own sale
+    if (req.user.role === "employee" && sale.employeeName !== req.user.name) {
+      return res.status(403).json({ message: "Not your sale" });
+    }
+
+    const { sellingPrice, deliveryCharge, paymentMethod, paidAmount } = req.body;
+
+    const sp = sellingPrice !== undefined ? Number(sellingPrice) : sale.sellingPrice;
+    const dc = deliveryCharge !== undefined ? Number(deliveryCharge) : sale.deliveryCharge;
+    const paid = paidAmount !== undefined ? Number(paidAmount) : sale.paidAmount;
+    const pm = paymentMethod !== undefined ? paymentMethod : sale.paymentMethod;
+
+    if (Number.isNaN(sp) || sp < 0)
+      return res.status(400).json({ message: "Invalid sellingPrice" });
+    if (Number.isNaN(dc) || dc < 0)
+      return res.status(400).json({ message: "Invalid deliveryCharge" });
+    if (Number.isNaN(paid) || paid < 0)
+      return res.status(400).json({ message: "Invalid paidAmount" });
+    if (!["COD", "Online"].includes(pm))
+      return res.status(400).json({ message: "Invalid paymentMethod" });
+
+    sale.sellingPrice = sp;
+    sale.deliveryCharge = dc;
+    sale.paymentMethod = pm;
+    sale.paidAmount = paid;
+    sale.totalAmount = sp + dc;
+    sale.pendingAmount = Math.max(sale.totalAmount - paid, 0);
+
+    await sale.save();
+
+    res.status(200).json({ message: "Sale updated", sale });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update sale", error: error.message });
   }
 };

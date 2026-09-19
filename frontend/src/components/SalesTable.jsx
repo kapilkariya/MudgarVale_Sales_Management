@@ -1,7 +1,14 @@
 import { formatCurrency } from "../utils/formatCurrency";
 import { formatDate } from "../utils/formatDate";
 
-export default function SalesTable({ sales = [], showEmployee = true, onDelete }) {
+export default function SalesTable({
+  sales = [],
+  showEmployee = true,
+  onEdit,
+  onDelete,
+}) {
+  const hasActions = onEdit || onDelete;
+
   if (!sales.length) {
     return (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center">
@@ -27,7 +34,9 @@ export default function SalesTable({ sales = [], showEmployee = true, onDelete }
               <th className="px-4 py-3 font-medium text-right">Paid</th>
               <th className="px-4 py-3 font-medium text-right">Pending</th>
               <th className="px-4 py-3 font-medium">Date</th>
-              {onDelete && <th className="px-4 py-3 font-medium text-right">Action</th>}
+              {hasActions && (
+                <th className="px-4 py-3 font-medium text-right">Actions</th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -39,7 +48,9 @@ export default function SalesTable({ sales = [], showEmployee = true, onDelete }
                   </td>
                 )}
                 <td className="px-4 py-3 text-slate-900">{s.productName}</td>
-                <td className="px-4 py-3 text-slate-600 capitalize">{s.category}</td>
+                <td className="px-4 py-3 text-slate-600 capitalize">
+                  {s.category}
+                </td>
                 <td className="px-4 py-3 text-slate-600">{s.weight}</td>
                 <td className="px-4 py-3 text-right text-slate-700">
                   {formatCurrency(s.sellingPrice)}
@@ -74,14 +85,26 @@ export default function SalesTable({ sales = [], showEmployee = true, onDelete }
                 <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
                   {formatDate(s.createdAt)}
                 </td>
-                {onDelete && (
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => onDelete(s._id)}
-                      className="text-xs font-medium text-red-600 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
+                {hasActions && (
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <div className="flex justify-end gap-2">
+                      {onEdit && (
+                        <button
+                          onClick={() => onEdit(s)}
+                          className="text-xs font-medium text-slate-700 hover:text-slate-900 px-2 py-1 rounded border border-slate-200"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          onClick={() => onDelete(s)}
+                          className="text-xs font-medium text-red-600 hover:text-red-700 px-2 py-1 rounded border border-red-200"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
                   </td>
                 )}
               </tr>
