@@ -14,7 +14,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173", // Vite dev server default
   "https://mudgar-vale-sales-management.vercel.app",
-  'https://mudgar-vale-sales-management-yg4u.vercel.app/', // replace with your real deployed frontend URL
+  'https://mudgar-vale-sales-management-yg4u.vercel.app', // replace with your real deployed frontend URL
 ];
 
 app.use(
